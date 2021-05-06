@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	paymentOrderRealtimeURI = "https://api-jiesuan.yunzhanghu.com/api/payment/v1/order-realtime"
+	paymentOrderRealtimeURI = "/api/payment/v1/order-realtime"
 )
 
 type (

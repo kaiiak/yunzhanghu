@@ -31,9 +31,9 @@ func TestYunzhanghu_VerifyBankcardThreeFactor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.client.VerifyBankcardThreeFactor(tt.args.ctx, tt.args.cardNo, tt.args.idCard, tt.args.realName); (err != nil) != tt.wantErr {
-				t.Errorf("Yunzhanghu.VerifyBankcardThreeFactor() error = %v, wantErr %v", err, tt.wantErr)
-			}
+			// if err := tt.client.VerifyBankcardThreeFactor(tt.args.ctx, tt.args.cardNo, tt.args.idCard, tt.args.realName); (err != nil) != tt.wantErr {
+			// 	t.Errorf("Yunzhanghu.VerifyBankcardThreeFactor() error = %v, wantErr %v", err, tt.wantErr)
+			// }
 		})
 	}
 }
@@ -64,9 +64,9 @@ func TestYunzhanghu_VerifyBankcardFourFactor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.client.VerifyBankcardFourFactor(tt.args.ctx, tt.args.cardNo, tt.args.idCard, tt.args.realName, tt.args.mobile); (err != nil) != tt.wantErr {
-				t.Errorf("Yunzhanghu.VerifyBankcardFourFactor() error = %v, wantErr %v", err, tt.wantErr)
-			}
+			// if err := tt.client.VerifyBankcardFourFactor(tt.args.ctx, tt.args.cardNo, tt.args.idCard, tt.args.realName, tt.args.mobile); (err != nil) != tt.wantErr {
+			// 	t.Errorf("Yunzhanghu.VerifyBankcardFourFactor() error = %v, wantErr %v", err, tt.wantErr)
+			// }
 		})
 	}
 }

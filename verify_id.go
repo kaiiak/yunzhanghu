@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	authenticationVerifyIdURI = "https://api-jiesuan.yunzhanghu.com/authentication/verify-id"
+	authenticationVerifyIdURI = "/authentication/verify-id"
 )
 
 type (

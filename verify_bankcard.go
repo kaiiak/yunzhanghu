@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	authenticationVerifyBankcardThreeFactorURI = "https://api-jiesuan.yunzhanghu.com/authentication/verify-bankcard-three-factor"
-	authenticationVerifyBankcardFourFactorURI  = "https://api-jiesuan.yunzhanghu.com/authentication/verify-bankcard-four-factor"
+	authenticationVerifyBankcardThreeFactorURI = "/authentication/verify-bankcard-three-factor"
+	authenticationVerifyBankcardFourFactorURI  = "/authentication/verify-bankcard-four-factor"
 )
 
 type (

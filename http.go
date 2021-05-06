@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -20,7 +19,6 @@ import (
 
 var (
 	httpClient *http.Client
-	random     = rand.New(rand.NewSource(time.Now().UnixNano()))
 	s          = []byte("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
 
@@ -30,9 +28,9 @@ func init() {
 
 type (
 	CommonResponse struct {
-		Code    string `json:"code"`
-		Message string `json:"message"`
-		ReqID   string `json:"request_id"`
+		Code    StatusCode `json:"code"`
+		Message string     `json:"message"`
+		ReqID   string     `json:"request_id"`
 	}
 )
 
@@ -48,14 +46,21 @@ func randomString(length int) string {
 	return b.String()
 }
 
+func (y *Yunzhanghu) getJson(uri, apiName string, obj interface{}) ([]byte, error) {
+	return y.doRequest(http.MethodGet, uri, apiName, obj)
+}
+
 func (y *Yunzhanghu) postJSON(uri, apiName string, obj interface{}) ([]byte, error) {
+	return y.doRequest(http.MethodPost, uri, apiName, obj)
+}
+
+func (y *Yunzhanghu) doRequest(method, uri, apiName string, obj interface{}) ([]byte, error) {
 	var (
 		now         = time.Now()
-		r           = rand.New(rand.NewSource(now.UnixNano()))
 		b, _        = json.Marshal(obj)
 		data, err   = TripleDesEncrypt(b, []byte(y.DesKey))
 		encodedData = base64.StdEncoding.EncodeToString(data)
-		randInt     = r.Intn(99999)
+		randInt     = random.Intn(99999)
 		parms       = fmt.Sprintf(`data=%s&mess=%d&timestamp=%d&key=%s`, string(encodedData), randInt, now.Unix(), y.Appkey)
 		requestId   = randomString(10)
 	)
@@ -76,7 +81,7 @@ func (y *Yunzhanghu) postJSON(uri, apiName string, obj interface{}) ([]byte, err
 
 	var (
 		resp   *http.Response
-		req, _ = http.NewRequest(http.MethodPost, uri, strings.NewReader(params.Encode()))
+		req, _ = http.NewRequest(method, y.ApiAddr+uri, strings.NewReader(params.Encode()))
 	)
 	req.Header.Set("dealer-id", y.Dealer)
 	req.Header.Set("request-id", requestId)
