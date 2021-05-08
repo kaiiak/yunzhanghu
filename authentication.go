@@ -1,8 +1,39 @@
 package yunzhanghu
 
-import (
-	"context"
+import "context"
+
+const (
+	authenticationVerifyIdURI = "/authentication/verify-id"
 )
+
+type (
+	reqVerifyid struct {
+		IdCard   string `json:"id_card"`
+		RealName string `json:"real_name"`
+	}
+	retVerifyid struct {
+		CommonResponse
+	}
+)
+
+func (y *Yunzhanghu) VerifyId(ctx context.Context, realName, idCard string) error {
+	var (
+		input = &reqVerifyid{
+			IdCard:   idCard,
+			RealName: realName,
+		}
+		output  = new(retVerifyid)
+		apiName = "身份证实名验证"
+	)
+	responseBytes, err := y.postJSON(ctx, authenticationVerifyIdURI, apiName, input)
+	if err != nil {
+		return err
+	}
+	if err = y.decodeWithError(responseBytes, output, apiName); err != nil {
+		return err
+	}
+	return nil
+}
 
 const (
 	authenticationVerifyBankcardThreeFactorURI = "/authentication/verify-bankcard-three-factor"
@@ -31,7 +62,7 @@ func (y *Yunzhanghu) VerifyBankcardThreeFactor(ctx context.Context, cardNo, idCa
 		ret     = new(retVerifyBankcardFourFactor)
 		apiName = "银行卡三要素认证"
 	)
-	bs, err := y.postJSON(authenticationVerifyBankcardThreeFactorURI, apiName, req)
+	bs, err := y.postJSON(ctx, authenticationVerifyBankcardThreeFactorURI, apiName, req)
 	if err != nil {
 		return err
 	}
@@ -52,7 +83,7 @@ func (y *Yunzhanghu) VerifyBankcardFourFactor(ctx context.Context, cardNo, idCar
 		ret     = new(retVerifyBankcardFourFactor)
 		apiName = "银行卡四要素认证"
 	)
-	bs, err := y.postJSON(authenticationVerifyBankcardFourFactorURI, apiName, req)
+	bs, err := y.postJSON(ctx, authenticationVerifyBankcardFourFactorURI, apiName, req)
 	if err != nil {
 		return err
 	}

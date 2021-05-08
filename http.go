@@ -2,18 +2,21 @@ package yunzhanghu
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -46,50 +49,122 @@ func randomString(length int) string {
 	return b.String()
 }
 
-func (y *Yunzhanghu) getJson(uri, apiName string, obj interface{}) ([]byte, error) {
-	return y.doRequest(http.MethodGet, uri, apiName, obj)
-}
-
-func (y *Yunzhanghu) postJSON(uri, apiName string, obj interface{}) ([]byte, error) {
-	return y.doRequest(http.MethodPost, uri, apiName, obj)
-}
-
-func (y *Yunzhanghu) doRequest(method, uri, apiName string, obj interface{}) ([]byte, error) {
-	var (
-		now         = time.Now()
-		b, _        = json.Marshal(obj)
-		data, err   = TripleDesEncrypt(b, []byte(y.DesKey))
-		encodedData = base64.StdEncoding.EncodeToString(data)
-		randInt     = random.Intn(99999)
-		parms       = fmt.Sprintf(`data=%s&mess=%d&timestamp=%d&key=%s`, string(encodedData), randInt, now.Unix(), y.Appkey)
-		requestId   = randomString(10)
-	)
+func (y *Yunzhanghu) getJson(ctx context.Context, uri, apiName string, obj interface{}) ([]byte, error) {
+	req, err := y.buildRequest(http.MethodGet, uri, apiName, obj)
 	if err != nil {
 		return nil, err
 	}
+	return y.doRequest(ctx, req)
+}
+
+func (y *Yunzhanghu) postJSON(ctx context.Context, uri, apiName string, obj interface{}) ([]byte, error) {
+	req, err := y.buildRequest(http.MethodPost, uri, apiName, obj)
+	if err != nil {
+		return nil, err
+	}
+	return y.doRequest(ctx, req)
+}
+
+func (y *Yunzhanghu) postForm(ctx context.Context, uri, apiName string, obj interface{}, files map[string]io.Reader) ([]byte, error) {
+	req, err := y.buildFormRequest(uri, apiName, obj, files)
+	if err != nil {
+		return nil, err
+	}
+	return y.doRequest(ctx, req)
+}
+
+func (y *Yunzhanghu) buildFormRequest(uri, apiName string, obj interface{}, files map[string]io.Reader) (*http.Request, error) {
+	buf := bytes.NewBuffer(nil)
+	mw := multipart.NewWriter(buf)
+	for name, r := range files {
+		var (
+			fw  io.Writer
+			err error
+		)
+		if c, ok := r.(io.Closer); ok {
+			defer c.Close()
+		}
+		if f, ok := r.(*os.File); ok {
+			fw, err = mw.CreateFormFile(name, f.Name())
+		} else {
+			fw, err = mw.CreateFormField(name)
+		}
+		if err != nil {
+			return nil, err
+		}
+		if _, err = io.Copy(fw, r); err != nil {
+			return nil, err
+		}
+	}
+	mw.Close()
+	var (
+		req, _    = http.NewRequest(http.MethodPost, y.ApiAddr+uri, buf)
+		requestId string
+		err       error
+	)
+	req.URL.RawQuery, requestId, err = y.buildParams(obj)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("dealer-id", y.Dealer)
+	req.Header.Set("request-id", requestId)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	return req, nil
+}
+
+func (y *Yunzhanghu) buildRequest(method, uri, apiName string, obj interface{}) (*http.Request, error) {
+	var (
+		req, _    = http.NewRequest(method, y.ApiAddr+uri, nil)
+		requestId string
+		err       error
+	)
+	req.URL.RawQuery, requestId, err = y.buildParams(obj)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("dealer-id", y.Dealer)
+	req.Header.Set("request-id", requestId)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	return req, nil
+}
+
+func (y *Yunzhanghu) buildParams(obj interface{}) (requestId string, query string, err error) {
+	var (
+		now     = time.Now()
+		b, _    = json.Marshal(obj)
+		randInt = random.Intn(99999)
+		data    []byte
+	)
+	data, err = TripleDesEncrypt(b, []byte(y.DesKey))
+	if err != nil {
+		return
+	}
+	encodedData := base64.StdEncoding.EncodeToString(data)
 	hash := hmac.New(sha256.New, []byte(y.Appkey))
+	parms := fmt.Sprintf(`data=%s&mess=%d&timestamp=%d&key=%s`, string(encodedData), randInt, now.Unix(), y.Appkey)
 	hash.Write([]byte(parms))
 	md := hash.Sum(nil)
 	hashStr := hex.EncodeToString(md)
-
+	requestId = randomString(10)
 	params := url.Values{}
 	params.Add("data", string(encodedData))
 	params.Add("mess", strconv.Itoa(randInt))
 	params.Add("timestamp", strconv.FormatInt(now.Unix(), 10))
 	params.Add("sign", hashStr)
 	params.Add("sign_type", "sha256")
+	query = params.Encode()
+	return
+}
 
-	var (
-		resp   *http.Response
-		req, _ = http.NewRequest(method, y.ApiAddr+uri, strings.NewReader(params.Encode()))
-	)
-	req.Header.Set("dealer-id", y.Dealer)
-	req.Header.Set("request-id", requestId)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err = httpClient.Do(req)
+func (y *Yunzhanghu) doRequest(ctx context.Context, req *http.Request) ([]byte, error) {
+	req = req.WithContext(ctx)
+	var resp, err = httpClient.Do(req)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("%s %s %d", req.Method, req.URL.String(), resp.StatusCode)
 	}
 	defer resp.Body.Close()
 	bs, err := ioutil.ReadAll(resp.Body)

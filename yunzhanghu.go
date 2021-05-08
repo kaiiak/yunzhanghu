@@ -23,10 +23,13 @@ type (
 	}
 )
 
+func init() {
+	random = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
+
 func New(desKey, appkey, dealer, broker, apiAddr string) *Yunzhanghu {
 	if apiAddr == "" {
 		apiAddr = defaultApiAddr
 	}
-	random = rand.New(rand.NewSource(time.Now().UnixNano()))
 	return &Yunzhanghu{desKey, appkey, dealer, broker, apiAddr}
 }
