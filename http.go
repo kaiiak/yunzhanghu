@@ -31,9 +31,9 @@ func init() {
 
 type (
 	CommonResponse struct {
-		Code    StatusCode `json:"code"`
-		Message string     `json:"message"`
-		ReqID   string     `json:"request_id"`
+		Code      StatusCode `json:"code"`
+		Message   string     `json:"message"`
+		RequestId string     `json:"request_id"`
 	}
 )
 
@@ -189,11 +189,12 @@ func (y *Yunzhanghu) decodeWithError(responseBytes []byte, obj interface{}, apiN
 	}
 	code := commonResponse.FieldByName("Code")
 	msg := commonResponse.FieldByName("Message")
+	id := commonResponse.FieldByName("RequestId")
 	if !code.IsValid() || !msg.IsValid() {
 		return fmt.Errorf("code or message is invalid")
 	}
 	if code.String() != "0000" {
-		return fmt.Errorf("%s Error, errcode=%v , errmsg=%v", apiName, code, msg)
+		return &Error{StatusCode(code.String()), msg.String(), id.String(), apiName}
 	}
 	return nil
 }

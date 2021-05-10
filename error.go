@@ -1,10 +1,14 @@
 package yunzhanghu
 
+import "fmt"
+
 type Error struct {
-	Code               StatusCode
-	Message, RequestId string
+	Code      StatusCode
+	Message   string
+	RequestId string
+	ApiName   string
 }
 
-func (*Error) Error() string {
-	return ""
+func (e *Error) Error() string {
+	return fmt.Sprintf("%s:%s:%s(request_id:%s)", e.ApiName, e.Code, e.Message, e.RequestId)
 }
