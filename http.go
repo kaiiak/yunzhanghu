@@ -102,13 +102,13 @@ func (y *Yunzhanghu) buildFormRequest(uri, apiName string, obj interface{}, file
 		requestId string
 		err       error
 	)
-	req.URL.RawQuery, requestId, err = y.buildParams(obj)
+	requestId, req.URL.RawQuery, err = y.buildParams(obj)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.Header.Set("dealer-id", y.Dealer)
 	req.Header.Set("request-id", requestId)
-	req.Header.Set("Content-Type", mw.FormDataContentType())
 	return req, nil
 }
 
