@@ -102,7 +102,7 @@ func (y *Yunzhanghu) buildFormRequest(uri, apiName string, obj interface{}, file
 		requestId string
 		err       error
 	)
-	req.URL.RawQuery, requestId, err = y.buildParams(obj)
+	requestId, req.URL.RawQuery, err = y.buildParams(obj)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (y *Yunzhanghu) buildRequest(method, uri, apiName string, obj interface{}) 
 		requestId string
 		err       error
 	)
-	req.URL.RawQuery, requestId, err = y.buildParams(obj)
+	requestId, req.URL.RawQuery, err = y.buildParams(obj)
 	if err != nil {
 		return nil, err
 	}
