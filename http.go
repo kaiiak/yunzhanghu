@@ -13,10 +13,12 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"net/url"
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -74,8 +76,14 @@ func (y *Yunzhanghu) postForm(ctx context.Context, uri, apiName string, obj inte
 }
 
 func (y *Yunzhanghu) buildFormRequest(uri, apiName string, obj interface{}, files map[string]io.Reader) (*http.Request, error) {
-	buf := bytes.NewBuffer(nil)
-	mw := multipart.NewWriter(buf)
+	var (
+		buf       = bytes.NewBuffer(nil)
+		mw        = multipart.NewWriter(buf)
+		req       *http.Request
+		requestId string
+		err       error
+		params    url.Values
+	)
 	for name, r := range files {
 		var (
 			fw  io.Writer
@@ -96,16 +104,17 @@ func (y *Yunzhanghu) buildFormRequest(uri, apiName string, obj interface{}, file
 			return nil, err
 		}
 	}
-	mw.Close()
-	var (
-		req, _    = http.NewRequest(http.MethodPost, y.ApiAddr+uri, buf)
-		requestId string
-		err       error
-	)
-	requestId, req.URL.RawQuery, err = y.buildParams(obj)
+	requestId, params, err = y.buildParams(obj)
 	if err != nil {
 		return nil, err
 	}
+	if _, err = mw.CreatePart(textproto.MIMEHeader(params)); err != nil {
+		return nil, err
+	}
+	if err = mw.Close(); err != nil {
+		return nil, err
+	}
+	req, _ = http.NewRequest(http.MethodPost, y.ApiAddr+uri, buf)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.Header.Set("dealer-id", y.Dealer)
 	req.Header.Set("request-id", requestId)
@@ -114,14 +123,16 @@ func (y *Yunzhanghu) buildFormRequest(uri, apiName string, obj interface{}, file
 
 func (y *Yunzhanghu) buildRequest(method, uri, apiName string, obj interface{}) (*http.Request, error) {
 	var (
-		req, _    = http.NewRequest(method, y.ApiAddr+uri, nil)
+		req       *http.Request
 		requestId string
 		err       error
+		params    url.Values
 	)
-	requestId, req.URL.RawQuery, err = y.buildParams(obj)
+	requestId, params, err = y.buildParams(obj)
 	if err != nil {
 		return nil, err
 	}
+	req, _ = http.NewRequest(method, y.ApiAddr+uri, strings.NewReader(params.Encode()))
 	req.Header.Set("dealer-id", y.Dealer)
 	req.Header.Set("request-id", requestId)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -129,7 +140,7 @@ func (y *Yunzhanghu) buildRequest(method, uri, apiName string, obj interface{}) 
 	return req, nil
 }
 
-func (y *Yunzhanghu) buildParams(obj interface{}) (requestId string, query string, err error) {
+func (y *Yunzhanghu) buildParams(obj interface{}) (requestId string, params url.Values, err error) {
 	var (
 		now     = time.Now()
 		b, _    = json.Marshal(obj)
@@ -147,13 +158,12 @@ func (y *Yunzhanghu) buildParams(obj interface{}) (requestId string, query strin
 	md := hash.Sum(nil)
 	hashStr := hex.EncodeToString(md)
 	requestId = randomString(10)
-	params := url.Values{}
+	params = make(url.Values)
 	params.Add("data", string(encodedData))
 	params.Add("mess", strconv.Itoa(randInt))
 	params.Add("timestamp", strconv.FormatInt(now.Unix(), 10))
 	params.Add("sign", hashStr)
 	params.Add("sign_type", "sha256")
-	query = params.Encode()
 	return
 }
 

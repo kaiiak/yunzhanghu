@@ -42,9 +42,9 @@ const (
 
 type (
 	reqVerifyBankcardFourFactor struct {
-		CardNo   string `json:"card_no,omitempty"`
-		IdCard   string `json:"id_card,omitempty"`
-		RealName string `json:"real_name,omitempty"`
+		CardNo   string `json:"card_no"`
+		IdCard   string `json:"id_card"`
+		RealName string `json:"real_name"`
 		Mobile   string `json:"mobile,omitempty"`
 	}
 	retVerifyBankcardFourFactor struct {
