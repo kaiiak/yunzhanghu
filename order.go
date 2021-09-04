@@ -27,3 +27,11 @@ type (
 		EncryData           string            `json:"encry_data"`    //  当且仅当data_type为encryption时，返回且仅返回该加密数据字段
 	}
 )
+
+func (o Order) GetOrderStatus() string {
+	return o.Status.Message()
+}
+
+func (o Order) GetOrderStatusDetail() string {
+	return o.StatusDetail.Message()
+}

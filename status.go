@@ -69,5 +69,19 @@ func (s StatusCode) Message() string {
 	if msg, ok := responseCodes[s]; ok {
 		return msg
 	}
-	return fmt.Sprintf("未知错误 %s", s)
+	return fmt.Sprintf("未知错误 %v", s)
+}
+
+func (s OrderStatus) Message() string {
+	if msg, ok := orderStatus[s]; ok {
+		return msg
+	}
+	return fmt.Sprintf("未知状态 %v", s)
+}
+
+func (d OrderStatusDetail) Message() string {
+	if msg, ok := orderStatusDetail[d]; ok {
+		return msg
+	}
+	return fmt.Sprintf("未知状态 %v", d)
 }
