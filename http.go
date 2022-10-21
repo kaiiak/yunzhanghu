@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
@@ -177,7 +176,7 @@ func (y *Yunzhanghu) doRequest(ctx context.Context, req *http.Request) ([]byte, 
 		return nil, fmt.Errorf("%s %s %d", req.Method, req.URL.String(), resp.StatusCode)
 	}
 	defer resp.Body.Close()
-	bs, err := ioutil.ReadAll(resp.Body)
+	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
