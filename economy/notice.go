@@ -1,7 +1,7 @@
-package yunzhanghu
+package economy
 
 type RegisterNotice struct {
-	Data      string `json:"data"` //base64(3des(jsonStr))
+	Data      string `json:"data"`
 	Mess      string `json:"mess"`
 	TimeStamp string `json:"time_stamp"`
 	Sign      string `json:"sign"`

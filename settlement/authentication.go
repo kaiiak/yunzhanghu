@@ -1,6 +1,10 @@
-package yunzhanghu
+package settlement
 
-import "context"
+import (
+	"context"
+
+	"github.com/kaiiak/yunzhanghu/core/httpclient"
+)
 
 const (
 	authenticationVerifyIdURI = "/authentication/verify-id"
@@ -12,11 +16,11 @@ type (
 		RealName string `json:"real_name"`
 	}
 	retVerifyid struct {
-		CommonResponse
+		httpclient.CommonResponse
 	}
 )
 
-func (y *Yunzhanghu) VerifyId(ctx context.Context, realName, idCard string) error {
+func (y *Settlement) VerifyId(ctx context.Context, realName, idCard string) error {
 	var (
 		input = &reqVerifyid{
 			IdCard:   idCard,
@@ -25,11 +29,11 @@ func (y *Yunzhanghu) VerifyId(ctx context.Context, realName, idCard string) erro
 		output  = new(retVerifyid)
 		apiName = "身份证实名验证"
 	)
-	responseBytes, err := y.postJSON(ctx, authenticationVerifyIdURI, apiName, input)
+	responseBytes, err := y.PostJSON(ctx, authenticationVerifyIdURI, input)
 	if err != nil {
 		return err
 	}
-	if err = y.decodeWithError(responseBytes, output, apiName); err != nil {
+	if err = y.DecodeWithError(responseBytes, output, apiName); err != nil {
 		return err
 	}
 	return nil
@@ -48,11 +52,11 @@ type (
 		Mobile   string `json:"mobile,omitempty"`
 	}
 	retVerifyBankcardFourFactor struct {
-		CommonResponse
+		httpclient.CommonResponse
 	}
 )
 
-func (y *Yunzhanghu) VerifyBankcardThreeFactor(ctx context.Context, cardNo, idCard, realName string) error {
+func (y *Settlement) VerifyBankcardThreeFactor(ctx context.Context, cardNo, idCard, realName string) error {
 	var (
 		req = &reqVerifyBankcardFourFactor{
 			CardNo:   cardNo,
@@ -62,17 +66,17 @@ func (y *Yunzhanghu) VerifyBankcardThreeFactor(ctx context.Context, cardNo, idCa
 		ret     = new(retVerifyBankcardFourFactor)
 		apiName = "银行卡三要素认证"
 	)
-	bs, err := y.postJSON(ctx, authenticationVerifyBankcardThreeFactorURI, apiName, req)
+	bs, err := y.PostJSON(ctx, authenticationVerifyBankcardThreeFactorURI, req)
 	if err != nil {
 		return err
 	}
-	if err = y.decodeWithError(bs, ret, apiName); err != nil {
+	if err = y.DecodeWithError(bs, ret, apiName); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (y *Yunzhanghu) VerifyBankcardFourFactor(ctx context.Context, cardNo, idCard, realName, mobile string) error {
+func (y *Settlement) VerifyBankcardFourFactor(ctx context.Context, cardNo, idCard, realName, mobile string) error {
 	var (
 		req = &reqVerifyBankcardFourFactor{
 			CardNo:   cardNo,
@@ -83,11 +87,11 @@ func (y *Yunzhanghu) VerifyBankcardFourFactor(ctx context.Context, cardNo, idCar
 		ret     = new(retVerifyBankcardFourFactor)
 		apiName = "银行卡四要素认证"
 	)
-	bs, err := y.postJSON(ctx, authenticationVerifyBankcardFourFactorURI, apiName, req)
+	bs, err := y.PostJSON(ctx, authenticationVerifyBankcardFourFactorURI, req)
 	if err != nil {
 		return err
 	}
-	if err = y.decodeWithError(bs, ret, apiName); err != nil {
+	if err = y.DecodeWithError(bs, ret, apiName); err != nil {
 		return err
 	}
 	return nil

@@ -1,11 +1,11 @@
-package yunzhanghu_test
+package core_test
 
 import (
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/kaiiak/yunzhanghu"
+	"github.com/kaiiak/yunzhanghu/core"
 )
 
 func TestCustomTime_UnmarshalJson(t *testing.T) {
@@ -26,7 +26,7 @@ func TestCustomTime_UnmarshalJson(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := yunzhanghu.Time{}
+			tr := core.Time{}
 			if err := tr.UnmarshalJson(tt.args.data); (err != nil) != tt.wantErr {
 				t.Errorf("Time.UnmarshalJson() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
@@ -49,14 +49,14 @@ func TestTime_MarshalJSON(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				Time: time.Date(2017, time.October, 16, 20, 58, 29, 0, yunzhanghu.ShangHaiTimeLocation),
+				Time: time.Date(2017, time.October, 16, 20, 58, 29, 0, core.ShangHaiTimeLocation),
 			},
 			want: []byte("\"2017-10-16 20:58:29\""),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := yunzhanghu.Time{
+			tr := core.Time{
 				Time: tt.fields.Time,
 			}
 			got, err := tr.MarshalJSON()

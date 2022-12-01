@@ -1,4 +1,4 @@
-package yunzhanghu
+package credential
 
 import (
 	"bytes"
