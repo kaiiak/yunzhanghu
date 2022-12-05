@@ -19,9 +19,7 @@ func TestYunzhanghu_UserCardCheck(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{
-			// TODO 请填写测试用例
-		},
+		// TODO 请填写测试用例
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -45,9 +43,7 @@ func TestYunzhanghu_VerifyBankcardThreeFactor(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{
-			// TODO 请填写测试用例
-		},
+		// TODO 请填写测试用例
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -72,9 +68,7 @@ func TestYunzhanghu_VerifyBankcardFourFactor(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{
-			// TODO 请填写测试用例
-		},
+		// TODO 请填写测试用例
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
