@@ -1,4 +1,4 @@
-package credential
+package core
 
 import (
 	"crypto"
@@ -64,4 +64,20 @@ func FormatPrivateKey(privateKey string) string {
 		privateKey = privateKey + PEM_END
 	}
 	return privateKey
+}
+
+type rsaSign struct {
+	privateKey string
+}
+
+func NewRsaSing(privateKey string) Signer {
+	return &rsaSign{privateKey}
+}
+
+func (r *rsaSign) Type() string {
+	return "rsa"
+}
+
+func (r *rsaSign) Sign(params string) (string, error) {
+	return RsaSign(params, r.privateKey)
 }

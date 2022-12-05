@@ -1,4 +1,4 @@
-package config
+package core
 
 // Config for 云账户
 type Config struct {

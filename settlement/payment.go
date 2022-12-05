@@ -5,18 +5,7 @@ import (
 	"io"
 
 	"github.com/kaiiak/yunzhanghu/core"
-	"github.com/kaiiak/yunzhanghu/core/httpclient"
 )
-
-var ApiAddr = "https://api-jiesuan.yunzhanghu.com"
-
-type Settlement struct {
-	core.Core
-}
-
-func NewSettlement(ctx context.Context) {
-
-}
 
 const (
 	paymentOrderAlipayURI = "/api/payment/v1/order-alipay"
@@ -35,7 +24,7 @@ type (
 		PayRemark string `json:"pay_remark,omitempty"` // 打款备注(选填，最⼤大20个字符，⼀一个汉字占2个字符，不不允许特殊字符:' " & | @ % * ( ) - : // ¥)
 	}
 	retOrderAlipay struct {
-		httpclient.CommonResponse
+		core.CommonResponse
 		Data struct {
 			OrderId string `json:"order_id"`
 			Ref     string `json:"ref"`
@@ -60,11 +49,11 @@ func (s *Settlement) OrderAlipay(ctx context.Context, orderId, realName, idCard,
 		}
 		ret = new(retOrderAlipay)
 	)
-	responseBytes, err := s.PostJSON(ctx, paymentOrderAlipayURI, req)
+	responseBytes, err := core.PostJSON(s.newContext(ctx, core.NewSHA256Sign(s.Appkey)), paymentOrderAlipayURI, req)
 	if err != nil {
 		return err
 	}
-	if err = s.DecodeWithError(responseBytes, ret, apiName); err != nil {
+	if err = core.DecodeWithError(responseBytes, ret, apiName); err != nil {
 		return err
 	}
 	return nil
@@ -89,7 +78,7 @@ type (
 		PayRemark string `json:"pay_remark,omitempty"` // 打款备注(选填，最⼤大20个字符，⼀个汉字占2个字符，不不允许特殊字符:' " & | @ % * ( ) - : # ¥)
 	}
 	retOrderRealtime struct {
-		httpclient.CommonResponse
+		core.CommonResponse
 		Data struct {
 			OrderId string `json:"order_id"`
 			Ref     string `json:"ref"`
@@ -104,11 +93,11 @@ func (s *Settlement) OrderRealTime(ctx context.Context) error {
 		req     = &reqOrderRealtime{}
 		ret     = new(retOrderRealtime)
 	)
-	responseBytes, err := s.PostJSON(ctx, paymentOrderRealtimeURI, req)
+	responseBytes, err := core.PostJSON(s.newContext(ctx, core.NewSHA256Sign(s.Appkey)), paymentOrderRealtimeURI, req)
 	if err != nil {
 		return err
 	}
-	if err = s.DecodeWithError(responseBytes, ret, apiName); err != nil {
+	if err = core.DecodeWithError(responseBytes, ret, apiName); err != nil {
 		return err
 	}
 	return nil
@@ -125,7 +114,7 @@ type (
 		DataType string `json:"data_type"` // 如果为encryption，则对返回的data进⾏行行加密(选填)
 	}
 	retQueryRealtimeOrder struct {
-		httpclient.CommonResponse
+		core.CommonResponse
 		Data Order `json:"data"`
 	}
 )
@@ -142,11 +131,11 @@ func (s *Settlement) QueryRealtimeOrder(ctx context.Context, orderId, channel st
 	if encrypted {
 		req.DataType = "encryption"
 	}
-	respnseBytes, err := s.GetJson(ctx, queryRealtimeOrderURI, req)
+	respnseBytes, err := core.GetJson(s.newContext(ctx, core.NewSHA256Sign(s.Appkey)), queryRealtimeOrderURI, req)
 	if err != nil {
 		return nil, err
 	}
-	if err = s.DecodeWithError(respnseBytes, resp, apiName); err != nil {
+	if err = core.DecodeWithError(respnseBytes, resp, apiName); err != nil {
 		return nil, err
 	}
 	return &resp.Data, nil
@@ -164,7 +153,7 @@ type (
 		IdCard   string `json:"id_card"`   // ⽤用户身份证号(必填)
 	}
 	retUploadIdCardImage struct {
-		httpclient.CommonResponse
+		core.CommonResponse
 		Data interface{} `json:"data"`
 	}
 )
@@ -180,14 +169,14 @@ func (s *Settlement) UploadIdCardImage(ctx context.Context, realName, idCard str
 		}
 		resp = new(retUploadIdCardImage)
 	)
-	responsesBytes, err := s.PostForm(ctx, uploadIdCardImageURI, apiName, req, map[string]io.Reader{
+	responsesBytes, err := core.PostForm(s.newContext(ctx, core.NewSHA256Sign(s.Appkey)), uploadIdCardImageURI, apiName, req, map[string]io.Reader{
 		"id_card_image":           image,
 		"id_card_image_backgroud": backgroud,
 	})
 	if err != nil {
 		return err
 	}
-	if err = s.DecodeWithError(responsesBytes, resp, apiName); err != nil {
+	if err = core.DecodeWithError(responsesBytes, resp, apiName); err != nil {
 		return err
 	}
 	return nil
@@ -202,7 +191,7 @@ type (
 		BrokerId string `json:"broker_id"`
 	}
 	retAuthAlipay struct {
-		httpclient.CommonResponse
+		core.CommonResponse
 		Data struct {
 			Info string `json:"info"`
 		} `json:"data"`
@@ -215,11 +204,11 @@ func (s *Settlement) AuthAlipay(ctx context.Context) (string, error) {
 		req     = &reqAuthAlipay{BrokerId: s.Broker}
 		resp    = new(retAuthAlipay)
 	)
-	responseBytes, err := s.GetJson(ctx, authAlipayURI, req)
+	responseBytes, err := core.GetJson(s.newContext(ctx, core.NewSHA256Sign(s.Appkey)), authAlipayURI, req)
 	if err != nil {
 		return "", err
 	}
-	if err = s.DecodeWithError(responseBytes, resp, apiName); err != nil {
+	if err = core.DecodeWithError(responseBytes, resp, apiName); err != nil {
 		return "", err
 	}
 	return resp.Data.Info, nil

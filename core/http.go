@@ -1,4 +1,4 @@
-package httpclient
+package core
 
 import (
 	"bytes"
@@ -14,9 +14,6 @@ import (
 	"reflect"
 	"strconv"
 	"time"
-
-	"github.com/kaiiak/yunzhanghu/core/context"
-	"github.com/kaiiak/yunzhanghu/core/credential"
 )
 
 var (
@@ -48,7 +45,7 @@ func randomString(length int) string {
 	return b.String()
 }
 
-func GetJson(ctx context.Context, uri string, obj interface{}) ([]byte, error) {
+func GetJson(ctx *Context, uri string, obj interface{}) ([]byte, error) {
 	req, err := buildRequest(ctx, http.MethodGet, uri, obj)
 	if err != nil {
 		return nil, err
@@ -56,7 +53,7 @@ func GetJson(ctx context.Context, uri string, obj interface{}) ([]byte, error) {
 	return doRequest(ctx, req)
 }
 
-func PostJSON(ctx context.Context, uri string, obj interface{}) ([]byte, error) {
+func PostJSON(ctx *Context, uri string, obj interface{}) ([]byte, error) {
 	req, err := buildRequest(ctx, http.MethodPost, uri, obj)
 	if err != nil {
 		return nil, err
@@ -64,7 +61,7 @@ func PostJSON(ctx context.Context, uri string, obj interface{}) ([]byte, error) 
 	return doRequest(ctx, req)
 }
 
-func PostForm(ctx context.Context, uri, apiName string, obj interface{}, files map[string]io.Reader) ([]byte, error) {
+func PostForm(ctx *Context, uri, apiName string, obj interface{}, files map[string]io.Reader) ([]byte, error) {
 	req, err := buildFormRequest(ctx, uri, apiName, obj, files)
 	if err != nil {
 		return nil, err
@@ -72,7 +69,7 @@ func PostForm(ctx context.Context, uri, apiName string, obj interface{}, files m
 	return doRequest(ctx, req)
 }
 
-func buildFormRequest(ctx context.Context, uri, apiName string, obj interface{}, files map[string]io.Reader) (*http.Request, error) {
+func buildFormRequest(ctx *Context, uri, apiName string, obj interface{}, files map[string]io.Reader) (*http.Request, error) {
 	var (
 		buf       = bytes.NewBuffer(nil)
 		mw        = multipart.NewWriter(buf)
@@ -121,7 +118,7 @@ func buildFormRequest(ctx context.Context, uri, apiName string, obj interface{},
 	return req, nil
 }
 
-func buildRequest(ctx context.Context, method, uri string, obj interface{}) (*http.Request, error) {
+func buildRequest(ctx *Context, method, uri string, obj interface{}) (*http.Request, error) {
 	var (
 		req       *http.Request
 		requestId string
@@ -143,7 +140,7 @@ func buildRequest(ctx context.Context, method, uri string, obj interface{}) (*ht
 	return req, nil
 }
 
-func buildParams(ctx context.Context, obj interface{}) (requestId string, params url.Values, err error) {
+func buildParams(ctx *Context, obj interface{}) (requestId string, params url.Values, err error) {
 	var (
 		now     = time.Now().Unix()
 		b, _    = json.Marshal(obj)
@@ -151,7 +148,7 @@ func buildParams(ctx context.Context, obj interface{}) (requestId string, params
 		data    []byte
 		hashStr string
 	)
-	data, err = credential.TripleDesEncrypt(b, []byte(ctx.DesKey))
+	data, err = TripleDesEncrypt(b, []byte(ctx.DesKey))
 	if err != nil {
 		return
 	}
@@ -178,7 +175,7 @@ func buildParams(ctx context.Context, obj interface{}) (requestId string, params
 	return
 }
 
-func doRequest(ctx context.Context, req *http.Request) ([]byte, error) {
+func doRequest(ctx *Context, req *http.Request) ([]byte, error) {
 	req = req.WithContext(ctx)
 	var resp, err = httpClient.Do(req)
 	if err != nil {
