@@ -154,14 +154,6 @@ func buildParams(ctx *Context, obj interface{}) (requestId string, params url.Va
 	}
 	encodedData := base64.StdEncoding.EncodeToString(data)
 	parms := fmt.Sprintf(`data=%s&mess=%d&timestamp=%d&key=%s`, string(encodedData), randInt, now, ctx.Appkey)
-	// hash := hmaNew(sha256.New, []byte(y.Appkey))
-	// hash.Write([]byte(parms))
-	// md := hash.Sum(nil)
-	// hashStr := hex.EncodeToString(md)
-	// if hashStr, err = RsaSign(parms, ctx.PrivateKey); err != nil {
-	// 	log.Printf("RsaSign error: %v", err)
-	// 	return
-	// }
 	if hashStr, err = ctx.Signer.Sign(parms); err != nil {
 		return
 	}
