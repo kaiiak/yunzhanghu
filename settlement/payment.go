@@ -158,7 +158,7 @@ type (
 	}
 )
 
-func (s *Settlement) UploadIdCardImage(ctx context.Context, realName, idCard string, image, backgroud io.Reader) error {
+func (s *Settlement) UploadIdCardImage(ctx context.Context, realName, idCard string, image, background io.Reader) error {
 	var (
 		apiName = "身份证信息上传"
 		req     = &reqUploadIdCardImage{
@@ -170,8 +170,8 @@ func (s *Settlement) UploadIdCardImage(ctx context.Context, realName, idCard str
 		resp = new(retUploadIdCardImage)
 	)
 	responsesBytes, err := core.PostForm(s.newContext(ctx, core.NewSHA256Sign(s.Appkey)), uploadIdCardImageURI, apiName, req, map[string]io.Reader{
-		"id_card_image":           image,
-		"id_card_image_backgroud": backgroud,
+		"id_card_image":            image,
+		"id_card_image_background": background,
 	})
 	if err != nil {
 		return err
