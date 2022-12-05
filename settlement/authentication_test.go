@@ -1,10 +1,10 @@
-package yunzhanghu_test
+package settlement_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/kaiiak/yunzhanghu"
+	"github.com/kaiiak/yunzhanghu/settlement"
 )
 
 func TestYunzhanghu_UserCardCheck(t *testing.T) {
@@ -15,19 +15,11 @@ func TestYunzhanghu_UserCardCheck(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		client  *yunzhanghu.Yunzhanghu
+		client  *settlement.Settlement
 		args    args
 		wantErr bool
 	}{
-		{
-			name:   "ok",
-			client: &yunzhanghu.Yunzhanghu{},
-			args: args{
-				ctx: context.Background(),
-				// TODO
-			},
-			wantErr: true,
-		},
+		// TODO 请填写测试用例
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -47,19 +39,11 @@ func TestYunzhanghu_VerifyBankcardThreeFactor(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		client  *yunzhanghu.Yunzhanghu
+		client  *settlement.Settlement
 		args    args
 		wantErr bool
 	}{
-		{
-			name:   "ok",
-			client: &yunzhanghu.Yunzhanghu{},
-			args: args{
-				ctx: context.Background(),
-				// TODO
-			},
-			wantErr: true,
-		},
+		// TODO 请填写测试用例
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -80,19 +64,11 @@ func TestYunzhanghu_VerifyBankcardFourFactor(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		client  *yunzhanghu.Yunzhanghu
+		client  *settlement.Settlement
 		args    args
 		wantErr bool
 	}{
-		{
-			name:   "ok",
-			client: &yunzhanghu.Yunzhanghu{},
-			args: args{
-				ctx: context.Background(),
-				// TODO
-			},
-			wantErr: true,
-		},
+		// TODO 请填写测试用例
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -1,4 +1,6 @@
-package yunzhanghu
+package settlement
+
+import "github.com/kaiiak/yunzhanghu/core"
 
 type (
 	Order struct {
@@ -22,8 +24,8 @@ type (
 		PayRemark           string            `json:"pay_remark"` //  打款备注(选填，最⼤大20个字符，⼀一个汉字占2个字符，不不允许特殊字符:' " & | @ % * ( ) - : # ¥)
 		Tax                 string            `json:"tax"`
 		TaxLevel            string            `json:"tax_level"`
-		CreatedAt           Time              `json:"created_at"`    //  订单接收时间
-		FinishedTime        Time              `json:"finished_time"` //  订单处理理时间
+		CreatedAt           core.Time         `json:"created_at"`    //  订单接收时间
+		FinishedTime        core.Time         `json:"finished_time"` //  订单处理理时间
 		EncryData           string            `json:"encry_data"`    //  当且仅当data_type为encryption时，返回且仅返回该加密数据字段
 	}
 )
